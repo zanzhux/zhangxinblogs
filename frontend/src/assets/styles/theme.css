@@ -1,0 +1,346 @@
+/* 万能青年旅店主题 - 基于"INSIDE THE CABLE TEMPLE" */
+
+:root {
+    /* 主色调 - 自然基调 */
+    --moss-green: #4a5d4c;
+    /* 苔藓绿 */
+    --dark-green: #2c3729;
+    /* 墨绿 */
+    --cream-white: #f2f0e6;
+    /* 米白色，背景色 */
+    --gray-white: #e8e6df;
+    /* 灰白色，次要背景 */
+    /* 辅助色调 */
+    --indigo-blue: #415a77;
+    /* 靛蓝色，呼应"青" */
+    --gray-blue: #7d8b96;
+    /* 灰蓝色，次要 */
+    --rust-red: #a24936;
+    /* 锈红色，强调 */
+    --dark-gold: #9b8650;
+    /* 暗金色，标题 */
+    /* 文本色调 */
+    --text-dark: #2a2a29;
+    /* 主文本 */
+    --text-light: #e5e5e0;
+    /* 亮色背景上的文本 */
+    --text-muted: #6e7271;
+    /* 次要文本 */
+    /* 边框和阴影 */
+    --border-color: #d3cfc7;
+    /* 边框颜色 */
+    --shadow-color: rgba(0, 0, 0, 0.1);
+    /* 阴影 */
+    /* 间距 */
+    --spacing-xs: 0.25rem;
+    --spacing-sm: 0.5rem;
+    --spacing-md: 1rem;
+    --spacing-lg: 2rem;
+    --spacing-xl: 3rem;
+    /* 字体 */
+    --font-family-main: 'Noto Serif SC', 'Source Han Serif SC', serif;
+    /* 中文正文 */
+    --font-family-heading: 'Ma Shan Zheng', 'Noto Serif SC', serif;
+    /* 中文标题 */
+    --font-family-en: 'Spectral', 'Playfair Display', serif;
+    /* 英文 */
+}
+
+
+/* 全局样式 */
+
+body {
+    background-color: var(--cream-white);
+    color: var(--text-dark);
+    font-family: var(--font-family-main);
+    line-height: 1.6;
+    font-size: 16px;
+    background-image: url("../images/paper-texture.png");
+    background-repeat: repeat;
+}
+
+
+/* 添加复古纹理和噪点 */
+
+.vintage-texture {
+    position: relative;
+}
+
+.vintage-texture::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url("../images/noise-texture.png");
+    opacity: 0.05;
+    pointer-events: none;
+    z-index: 1;
+}
+
+
+/* 通用容器 */
+
+.container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: var(--spacing-md);
+}
+
+
+/* 标题样式 */
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    font-family: var(--font-family-heading);
+    color: var(--dark-green);
+    margin-bottom: var(--spacing-md);
+    font-weight: normal;
+}
+
+h1 {
+    font-size: 2.5rem;
+    letter-spacing: 0.05em;
+}
+
+h2 {
+    font-size: 2rem;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: var(--spacing-sm);
+}
+
+
+/* 英文标题 */
+
+.en-title {
+    font-family: var(--font-family-en);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--dark-gold);
+    font-size: 0.9em;
+    font-weight: 600;
+}
+
+
+/* 卡片样式 */
+
+.card {
+    background-color: var(--gray-white);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    padding: var(--spacing-md);
+    margin-bottom: var(--spacing-md);
+    box-shadow: 0 2px 4px var(--shadow-color);
+    position: relative;
+    overflow: hidden;
+}
+
+.card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 5px;
+    background-color: var(--moss-green);
+    opacity: 0.7;
+}
+
+
+/* 按钮样式 */
+
+.btn {
+    display: inline-block;
+    padding: 0.6em 1.2em;
+    background-color: var(--moss-green);
+    color: var(--text-light);
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-family: var(--font-family-main);
+    letter-spacing: 0.05em;
+    text-decoration: none;
+}
+
+.btn:hover {
+    background-color: var(--dark-green);
+}
+
+.btn-secondary {
+    background-color: transparent;
+    border: 1px solid var(--moss-green);
+    color: var(--moss-green);
+}
+
+.btn-secondary:hover {
+    background-color: rgba(74, 93, 76, 0.1);
+}
+
+.btn-accent {
+    background-color: var(--rust-red);
+}
+
+.btn-accent:hover {
+    background-color: #8e3e2f;
+}
+
+
+/* 输入框样式 */
+
+input,
+textarea,
+select {
+    width: 100%;
+    padding: 0.8em;
+    margin-bottom: var(--spacing-md);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    background-color: var(--cream-white);
+    color: var(--text-dark);
+    font-family: var(--font-family-main);
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+    outline: none;
+    border-color: var(--moss-green);
+    box-shadow: 0 0 0 2px rgba(74, 93, 76, 0.2);
+}
+
+
+/* 导航栏样式 */
+
+.nav {
+    background-color: var(--dark-green);
+    color: var(--text-light);
+    padding: var(--spacing-md) 0;
+}
+
+.nav-link {
+    color: var(--text-light);
+    text-decoration: none;
+    margin-right: var(--spacing-md);
+    padding: var(--spacing-xs) 0;
+    transition: all 0.3s ease;
+    border-bottom: 1px solid transparent;
+}
+
+.nav-link:hover,
+.nav-link.active {
+    border-bottom: 1px solid var(--text-light);
+}
+
+
+/* 标签样式 */
+
+.tag {
+    display: inline-block;
+    padding: 0.2em 0.6em;
+    background-color: rgba(74, 93, 76, 0.1);
+    color: var(--moss-green);
+    border-radius: 2px;
+    font-size: 0.85em;
+    margin-right: var(--spacing-xs);
+    margin-bottom: var(--spacing-xs);
+}
+
+
+/* 分割线 */
+
+hr {
+    border: 0;
+    height: 1px;
+    background-color: var(--border-color);
+    margin: var(--spacing-lg) 0;
+}
+
+
+/* 引用块 */
+
+blockquote {
+    border-left: 3px solid var(--moss-green);
+    padding-left: var(--spacing-md);
+    margin-left: 0;
+    color: var(--text-muted);
+    font-style: italic;
+}
+
+
+/* 页脚样式 */
+
+.footer {
+    background-color: var(--dark-green);
+    color: var(--text-light);
+    padding: var(--spacing-lg) 0;
+    margin-top: var(--spacing-xl);
+}
+
+
+/* 中文汉字装饰 */
+
+.chinese-character {
+    font-family: var(--font-family-heading);
+    font-size: 1.5rem;
+    opacity: 0.15;
+    position: absolute;
+    z-index: 0;
+}
+
+
+/* 特殊样式类 */
+
+.text-center {
+    text-align: center;
+}
+
+.text-right {
+    text-align: right;
+}
+
+.text-accent {
+    color: var(--rust-red);
+}
+
+.text-muted {
+    color: var(--text-muted);
+}
+
+.bg-light {
+    background-color: var(--gray-white);
+}
+
+.fade-in {
+    animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+
+/* 响应式设计 */
+
+@media (max-width: 768px) {
+    h1 {
+        font-size: 2rem;
+    }
+    h2 {
+        font-size: 1.5rem;
+    }
+    .container {
+        padding: var(--spacing-sm);
+    }
+}

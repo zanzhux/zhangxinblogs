@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="800px" height="600px" viewBox="0 0 800 600" version="1.1" xmlns="http://www.w3.org/2000/svg">
+    <title>水墨龙</title>
+    <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <!-- 水墨效果背景 -->
+        <path d="M400,300 C550,180 650,350 700,250 C750,150 600,50 500,100 C400,150 300,50 200,150 C100,250 250,450 400,300 Z" 
+              fill-opacity="0.1" fill="#615547"></path>
+        
+        <!-- 龙的主体 -->
+        <path d="M200,300 C250,280 300,320 350,290 C400,260 450,300 500,270 C550,240 600,280 650,250" 
+              stroke="#060505" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"
+              fill="none"></path>
+        
+        <!-- 龙的头部 -->
+        <path d="M650,250 C670,240 690,260 700,240" 
+              stroke="#060505" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"
+              fill="none"></path>
+        
+        <!-- 龙的眼睛 -->
+        <circle cx="680" cy="235" r="5" fill="#060505"></circle>
+        
+        <!-- 龙的胡须 -->
+        <path d="M670,240 C690,220 710,230 720,210" 
+              stroke="#060505" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"
+              fill="none"></path>
+        <path d="M670,245 C690,265 710,255 720,270" 
+              stroke="#060505" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"
+              fill="none"></path>
+        
+        <!-- 龙的鳞片 -->
+        <path d="M350,290 C355,300 345,310 350,320" 
+              stroke="#060505" stroke-width="5" stroke-linecap="round" fill="none"></path>
+        <path d="M400,260 C405,270 395,280 400,290" 
+              stroke="#060505" stroke-width="5" stroke-linecap="round" fill="none"></path>
+        <path d="M450,300 C455,310 445,320 450,330" 
+              stroke="#060505" stroke-width="5" stroke-linecap="round" fill="none"></path>
+        <path d="M500,270 C505,280 495,290 500,300" 
+              stroke="#060505" stroke-width="5" stroke-linecap="round" fill="none"></path>
+        <path d="M550,240 C555,250 545,260 550,270" 
+              stroke="#060505" stroke-width="5" stroke-linecap="round" fill="none"></path>
+        <path d="M600,280 C605,290 595,300 600,310" 
+              stroke="#060505" stroke-width="5" stroke-linecap="round" fill="none"></path>
+        
+        <!-- 墨水飞溅效果 -->
+        <circle cx="300" cy="350" r="3" fill="#060505" fill-opacity="0.7"></circle>
+        <circle cx="320" cy="370" r="2" fill="#060505" fill-opacity="0.5"></circle>
+        <circle cx="280" cy="330" r="4" fill="#060505" fill-opacity="0.6"></circle>
+        <circle cx="330" cy="310" r="2" fill="#060505" fill-opacity="0.4"></circle>
+        <circle cx="550" cy="300" r="3" fill="#060505" fill-opacity="0.7"></circle>
+        <circle cx="570" cy="280" r="2" fill="#060505" fill-opacity="0.5"></circle>
+        <circle cx="530" cy="320" r="4" fill="#060505" fill-opacity="0.6"></circle>
+    </g>
+</svg> 
