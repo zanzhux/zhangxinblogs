@@ -93,14 +93,20 @@ export default {
             this.scrollToBottom();
 
             try {
-                const response = await axios.post('http://localhost:3003/api/chat', {
+                const apiBase = (process.env.VUE_APP_API_URL || '').replace(/\/$/, '');
+                // 本地开发统一走 devServer 代理 /api -> 3003，避免浏览器直连 3003 未启动时报错
+                const chatUrl = process.env.NODE_ENV === 'development'
+                    ? '/api/chat'
+                    : (apiBase ? `${apiBase}/chat` : '/api/chat');
+                const headers = { 'Content-Type': 'application/json' };
+                const token = this.$store.state.token;
+                if (token) {
+                    headers.Authorization = `Bearer ${token}`;
+                }
+                const response = await axios.post(chatUrl, {
                     message: userMessage,
                     deepThinking: this.deepThinking
-                }, {
-                    headers: {
-                        'Authorization': `Bearer ${this.$store.state.token}`
-                    }
-                });
+                }, { headers });
 
                 this.messages.push({
                     role: 'assistant',
@@ -109,9 +115,21 @@ export default {
                 });
             } catch (error) {
                 console.error('聊天请求失败:', error);
+                const status = error.response && error.response.status;
+                const data = error.response && error.response.data;
+                const serverMsg = data && (data.details || data.error || data.message);
+                const isNetwork = !error.response && (error.code === 'ERR_NETWORK' || error.message === 'Network Error');
+                let hint = '';
+                if (status === 503 && serverMsg) {
+                    hint = serverMsg;
+                } else if (isNetwork) {
+                    hint = '（请另开终端：cd backend && npm start，并配置 backend/.env 中的 DEEPSEEK_API_KEY；前端保持 npm run serve）';
+                } else if (serverMsg) {
+                    hint = String(serverMsg);
+                }
                 this.messages.push({
                     role: 'assistant',
-                    content: '抱歉，我遇到了一些问题。请稍后再试。',
+                    content: hint ? `抱歉：${hint}` : '抱歉，AI 服务暂时不可用。',
                     time: this.getCurrentTime()
                 });
             } finally {

@@ -40,56 +40,8 @@
 
           <div class="article-footer">
             <div class="decorative-line"></div>
-
-            <div class="article-actions" v-if="canModify">
-              <router-link :to="`/edit-article/${article.id}`" class="btn edit-btn">
-                编辑文章
-              </router-link>
-              <button @click="showDeleteConfirm = true" class="btn delete-btn">
-                删除文章
-              </button>
-            </div>
           </div>
         </article>
-
-        <!-- 评论区域 -->
-        <div class="comments-section">
-          <h2 class="comments-title">评论区</h2>
-
-          <!-- 评论输入框 -->
-          <div v-if="isAuthenticated" class="comment-form">
-            <textarea v-model="newComment" placeholder="写下你的评论..." class="comment-input"
-              :class="{ 'has-error': commentError }"></textarea>
-            <div v-if="commentError" class="error-message">{{ commentError }}</div>
-            <button @click="submitComment" class="submit-comment-btn" :disabled="isSubmitting">
-              {{ isSubmitting ? '发送中...' : '发表评论' }}
-            </button>
-          </div>
-
-          <!-- 未登录提示 -->
-          <div v-else class="not-logged-in">
-            需要 <router-link to="/login">登录</router-link> 后才能发表评论
-          </div>
-
-          <!-- 评论列表 -->
-          <div class="comments-list" v-if="article.comments && article.comments.length > 0">
-            <div v-for="comment in article.comments" :key="comment.id" class="comment-card">
-              <div class="comment-header">
-                <span class="comment-author">{{ comment.username }}</span>
-                <span class="comment-date">{{ formatDate(comment.created_at) }}</span>
-              </div>
-              <div class="comment-content">{{ comment.content }}</div>
-              <div class="comment-actions" v-if="canDeleteComment(comment)">
-                <button @click="deleteComment(comment.id)" class="delete-comment-btn">删除</button>
-              </div>
-            </div>
-          </div>
-
-          <!-- 无评论提示 -->
-          <div v-else class="no-comments">
-            暂无评论，来说两句吧~
-          </div>
-        </div>
 
         <div class="related-articles" v-if="relatedArticles.length > 0">
           <h2 class="section-title">相关<span class="accent">文章</span></h2>
@@ -105,46 +57,18 @@
           </div>
         </div>
       </template>
-
-      <!-- 删除确认对话框 -->
-      <div class="modal" v-if="showDeleteConfirm">
-        <div class="modal-content">
-          <h3>确认删除</h3>
-          <p>确定要删除这篇文章吗？此操作不可撤销。</p>
-          <div class="modal-actions">
-            <button @click="showDeleteConfirm = false" class="btn cancel-btn">取消</button>
-            <button @click="deleteArticle" class="btn confirm-delete-btn">确认删除</button>
-          </div>
-        </div>
-      </div>
     </div>
   </div>
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
-
 export default {
   name: 'ArticleDetailView',
   data() {
     return {
       article: null,
       relatedArticles: [],
-      loading: true,
-      showDeleteConfirm: false,
-      newComment: '',
-      commentError: null,
-      isSubmitting: false
-    }
-  },
-  computed: {
-    ...mapGetters(['isAuthenticated', 'currentUser']),
-
-    canModify() {
-      if (!this.isAuthenticated || !this.article) return false
-      // 判断是否是文章作者或管理员
-      return (this.currentUser && this.article.author && this.currentUser.id === this.article.author.id) ||
-        (this.currentUser && this.currentUser.role === 'admin')
+      loading: true
     }
   },
   methods: {
@@ -205,31 +129,6 @@ export default {
       return `${year}.${month}.${day}`
     },
 
-    async deleteArticle() {
-      try {
-        // 首先确认文章ID存在
-        if (!this.article || !this.article.id) {
-          console.error('文章ID不存在，无法删除文章');
-          this.showDeleteConfirm = false;
-          return;
-        }
-
-        try {
-          await this.$axios.delete(`/articles/${this.article.id}`);
-        } catch (apiError) {
-          console.error('API删除文章失败，将直接通过Vuex删除:', apiError);
-          // 通过Vuex删除文章
-          await this.$store.dispatch('deleteArticle', this.article.id);
-        }
-
-        this.$router.push('/');
-      } catch (error) {
-        console.error('删除文章失败:', error);
-      } finally {
-        this.showDeleteConfirm = false;
-      }
-    },
-
     viewArticle(id) {
       // 确保ID存在，避免使用undefined作为路由参数
       if (id) {
@@ -247,53 +146,6 @@ export default {
       return '张鑫';
     },
 
-    async submitComment() {
-      if (!this.newComment.trim()) {
-        this.commentError = '评论内容不能为空';
-        return;
-      }
-
-      this.isSubmitting = true;
-      this.commentError = null;
-
-      try {
-        const response = await this.$axios.post(`/articles/${this.article.id}/comments`, {
-          content: this.newComment.trim()
-        });
-
-        // 将新评论添加到评论列表
-        if (!this.article.comments) {
-          this.article.comments = [];
-        }
-        this.article.comments.unshift(response.data);
-        this.newComment = '';
-      } catch (error) {
-        console.error('发表评论失败:', error);
-        this.commentError = error.response?.data?.message || '发表评论失败，请稍后重试';
-      } finally {
-        this.isSubmitting = false;
-      }
-    },
-
-    canDeleteComment(comment) {
-      if (!this.isAuthenticated || !this.currentUser) return false;
-      // 如果是管理员，可以删除任何评论
-      if (this.currentUser.role === 'admin') return true;
-      // 普通用户只能删除自己的评论
-      return this.currentUser.id === comment.user_id;
-    },
-
-    async deleteComment(commentId) {
-      if (!confirm('确定要删除这条评论吗？')) return;
-
-      try {
-        await this.$axios.delete(`/articles/${this.article.id}/comments/${commentId}`);
-        this.article.comments = this.article.comments.filter(c => c.id !== commentId);
-      } catch (error) {
-        console.error('删除评论失败:', error);
-        alert(error.response?.data?.message || '删除评论失败，请稍后重试');
-      }
-    }
   },
   created() {
     this.fetchArticle()
@@ -517,146 +369,6 @@ export default {
 
 .delete-btn {
   color: #ff6b6b;
-}
-
-/* 评论区样式 */
-.comments-section {
-  margin-top: var(--spacing-xl);
-  background-color: rgba(0, 0, 0, 0.15);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  padding: var(--spacing-xl);
-}
-
-.comments-title {
-  font-family: 'Ma Shan Zheng', cursive;
-  font-size: 2rem;
-  font-weight: normal;
-  margin-bottom: var(--spacing-lg);
-  text-align: center;
-}
-
-.comment-form {
-  margin-bottom: var(--spacing-xl);
-}
-
-.comment-input {
-  width: 100%;
-  min-height: 100px;
-  padding: var(--spacing-md);
-  background-color: rgba(0, 0, 0, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: rgba(255, 255, 255, 0.9);
-  font-size: 1rem;
-  resize: vertical;
-  margin-bottom: var(--spacing-sm);
-  transition: all 0.3s ease;
-}
-
-.comment-input:focus {
-  outline: none;
-  border-color: rgba(255, 255, 255, 0.3);
-  background-color: rgba(0, 0, 0, 0.3);
-}
-
-.comment-input.has-error {
-  border-color: #ff6b6b;
-}
-
-.submit-comment-btn {
-  padding: 0.7rem 1.5rem;
-  background-color: var(--color-black);
-  color: var(--color-light);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  cursor: pointer;
-  transition: all 0.3s ease;
-  font-family: 'Noto Serif SC', serif;
-}
-
-.submit-comment-btn:hover:not(:disabled) {
-  background-color: rgba(0, 0, 0, 0.8);
-}
-
-.submit-comment-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.error-message {
-  color: #ff6b6b;
-  font-size: 0.9rem;
-  margin-bottom: var(--spacing-sm);
-}
-
-.not-logged-in {
-  text-align: center;
-  padding: var(--spacing-md);
-  background-color: rgba(0, 0, 0, 0.2);
-  margin-bottom: var(--spacing-lg);
-}
-
-.not-logged-in a {
-  color: rgba(255, 255, 255, 0.9);
-  text-decoration: underline;
-  font-weight: 500;
-}
-
-.comments-list {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-md);
-}
-
-.comment-card {
-  background-color: rgba(0, 0, 0, 0.15);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  padding: var(--spacing-md);
-}
-
-.comment-header {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: var(--spacing-sm);
-  font-size: 0.9rem;
-}
-
-.comment-author {
-  font-weight: 500;
-}
-
-.comment-date {
-  opacity: 0.7;
-}
-
-.comment-content {
-  line-height: 1.6;
-  margin-bottom: var(--spacing-sm);
-  letter-spacing: 0.01em;
-}
-
-.comment-actions {
-  display: flex;
-  justify-content: flex-end;
-}
-
-.delete-comment-btn {
-  background: none;
-  border: none;
-  color: #ff6b6b;
-  cursor: pointer;
-  font-size: 0.85rem;
-  padding: 0;
-  opacity: 0.8;
-}
-
-.delete-comment-btn:hover {
-  opacity: 1;
-}
-
-.no-comments {
-  text-align: center;
-  padding: var(--spacing-lg);
-  background-color: rgba(0, 0, 0, 0.2);
-  opacity: 0.8;
 }
 
 /* 相关文章 */

@@ -6,6 +6,12 @@
           <div class="brush-image-container">
             <img src="../../public/fm.png" alt="防波堤手记" class="brush-image" />
           </div>
+
+          <!-- 装饰吉他 -->
+          <div class="hero-guitar-area">
+            <guitar-decoration />
+          </div>
+
           <div class="hero-text">
             <h2 class="hero-quote">以我之身躯为阶梯,以我之身躯为樊篱</h2>
             <p class="hero-subtitle">捶打我天然的沉默 / 切割我卑微与困惑</p>
@@ -34,9 +40,6 @@
 
         <div v-else-if="articles.length === 0" class="empty-state">
           <p>暂无文章</p>
-          <div class="action-btns">
-            <router-link to="/new-article" v-if="isAuthenticated" class="btn">写文章</router-link>
-          </div>
         </div>
 
         <div v-else class="articles-grid">
@@ -57,15 +60,12 @@
 
                 <p class="article-excerpt">{{ truncateContent(article.content) }}</p>
 
-                <div class="article-footer">
-                  <div class="article-tags" v-if="article.tags && article.tags.length > 0">
+                <div class="article-footer" v-if="article.tags && article.tags.length > 0">
+                  <div class="article-tags">
                     <span v-for="(tag, tagIndex) in article.tags" :key="tagIndex" class="mini-tag"
                       @click.stop="filterByTag(tag)">
                       {{ tag }}
                     </span>
-                  </div>
-                  <div class="article-stats">
-                    <span class="stat-item">{{ article.views_count || 0 }} 阅读</span>
                   </div>
                 </div>
               </div>
@@ -88,10 +88,11 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
+import GuitarDecoration from '@/components/GuitarDecoration.vue'
 
 export default {
   name: 'HomeView',
+  components: { GuitarDecoration },
   data() {
     return {
       articles: [],
@@ -104,7 +105,6 @@ export default {
     }
   },
   computed: {
-    ...mapGetters(['isAuthenticated']),
     totalPages() {
       return Math.ceil(this.totalArticles / this.limit)
     }
@@ -297,6 +297,23 @@ export default {
   height: auto;
 }
 
+/* 装饰吉他区域 */
+.hero-guitar-area {
+  width: 100%;
+  max-width: 960px;
+  margin: var(--spacing-lg) auto var(--spacing-xl);
+  transform: rotate(-4deg);
+  transform-origin: 50% 50%;
+  opacity: 0.88;
+  pointer-events: auto;
+  transition: opacity 0.35s ease, transform 0.35s ease;
+}
+
+.hero-guitar-area:hover {
+  opacity: 1;
+  transform: rotate(-2deg) scale(1.01);
+}
+
 .hero-text {
   text-align: center;
   margin-top: var(--spacing-md);
@@ -482,12 +499,6 @@ export default {
   border-radius: 2px;
 }
 
-.article-stats {
-  display: flex;
-  gap: var(--spacing-sm);
-  font-size: 0.8rem;
-  opacity: 0.7;
-}
 
 /* 分页 */
 .pagination {

@@ -18,7 +18,6 @@
 
         <div v-else-if="articles.length === 0" class="no-articles">
           <p>该分类下暂无文章</p>
-          <router-link to="/new-article" v-if="isAuthenticated" class="btn">写一篇新文章</router-link>
         </div>
 
         <div v-else class="articles-grid">
@@ -50,8 +49,6 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
-
 export default {
   name: 'ArticlesByCategoryView',
   data() {
@@ -60,9 +57,6 @@ export default {
       loading: true,
       categoryName: ''
     }
-  },
-  computed: {
-    ...mapGetters(['isAuthenticated'])
   },
   created() {
     this.fetchArticles();

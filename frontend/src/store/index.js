@@ -1,18 +1,44 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
-import axios from 'axios'
+import { defaultArticles, personalAuthor } from '@/data/personalBlogData'
 
 Vue.use(Vuex)
 
+const STORAGE_KEY = 'personal_blog_articles'
+const DATA_VERSION = 'v3'  // 每次更新 defaultArticles 时改一下版本号，自动清旧缓存
+
+const loadArticles = () => {
+    try {
+        if (localStorage.getItem('blog_data_version') !== DATA_VERSION) {
+            localStorage.removeItem(STORAGE_KEY)
+            localStorage.setItem('blog_data_version', DATA_VERSION)
+            return defaultArticles
+        }
+        const saved = localStorage.getItem(STORAGE_KEY)
+        if (saved) return JSON.parse(saved)
+    } catch (error) {
+        console.error('读取本地文章失败:', error)
+    }
+    return defaultArticles
+}
+
+const saveArticles = (articles) => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(articles))
+}
+
 export default new Vuex.Store({
     state: {
-        token: localStorage.getItem('token') || null,
-        user: JSON.parse(localStorage.getItem('user')) || null,
-        articles: [],
+        token: null,
+        user: personalAuthor,
+        articles: loadArticles(),
         currentArticle: null,
         loading: false,
         error: null,
-        dashboardStats: null
+        dashboardStats: {
+            articleCount: loadArticles().length,
+            commentCount: loadArticles().reduce((sum, a) => sum + (a.comments ? a.comments.length : 0), 0),
+            viewCount: loadArticles().reduce((sum, a) => sum + (a.views_count || 0), 0)
+        }
     },
     getters: {
         isAuthenticated: state => !!state.token,
@@ -51,12 +77,14 @@ export default new Vuex.Store({
         },
         SET_ARTICLES(state, articles) {
             state.articles = articles;
+            saveArticles(articles);
         },
         SET_CURRENT_ARTICLE(state, article) {
             state.currentArticle = article;
         },
         ADD_ARTICLE(state, article) {
             state.articles.unshift(article);
+            saveArticles(state.articles);
         },
         UPDATE_ARTICLE(state, updatedArticle) {
             const index = state.articles.findIndex(a => a.id === updatedArticle.id);
@@ -66,12 +94,14 @@ export default new Vuex.Store({
             if (state.currentArticle && state.currentArticle.id === updatedArticle.id) {
                 state.currentArticle = updatedArticle;
             }
+            saveArticles(state.articles);
         },
         REMOVE_ARTICLE(state, articleId) {
             state.articles = state.articles.filter(article => article.id !== articleId);
             if (state.currentArticle && state.currentArticle.id === articleId) {
                 state.currentArticle = null;
             }
+            saveArticles(state.articles);
         },
         SET_LOADING(state, status) {
             state.loading = status;
@@ -84,62 +114,18 @@ export default new Vuex.Store({
         }
     },
     actions: {
-        async register({ commit }, userData) {
-            commit('SET_LOADING', true);
-            commit('SET_ERROR', null);
-            try {
-                console.log('Registering user with data:', userData);
-                const response = await axios.post('/users/register', userData);
-                console.log('Registration response:', response.data);
-                const { token, user } = response.data;
-                commit('SET_TOKEN', token);
-                commit('SET_USER', user);
-                return user;
-            } catch (error) {
-                console.error('Registration error:', error);
-                const errorMessage = error.response && error.response.data && error.response.data.message ? error.response.data.message : '注册失败';
-                commit('SET_ERROR', errorMessage);
-                throw error;
-            } finally {
-                commit('SET_LOADING', false);
-            }
+        async register() {
+            return personalAuthor;
         },
-        async login({ commit }, userData) {
-            commit('SET_LOADING', true);
-            commit('SET_ERROR', null);
-            try {
-                const response = await axios.post('/users/login', userData);
-                const { token, user } = response.data;
-                commit('SET_TOKEN', token);
-                commit('SET_USER', user);
-                return user;
-            } catch (error) {
-                const errorMessage = error.response && error.response.data && error.response.data.message ? error.response.data.message : '登录失败';
-                commit('SET_ERROR', errorMessage);
-                throw error;
-            } finally {
-                commit('SET_LOADING', false);
-            }
+        async login() {
+            return personalAuthor;
         },
-        logout({ commit }) {
-            commit('CLEAR_AUTH');
+        logout() {
+            return true;
         },
         async fetchArticles({ commit }) {
             try {
-                console.log('Fetching articles from API...');
-                const response = await axios.get('/articles');
-                console.log('Articles API response:', {
-                    status: response.status,
-                    articleCount: response.data.length,
-                    sampleArticle: response.data[0] ? {
-                        id: response.data[0].id,
-                        title: response.data[0].title,
-                        hasCoverImage: !!response.data[0].cover_image,
-                        coverImageLength: response.data[0].cover_image ? response.data[0].cover_image.length : 0
-                    } : null
-                });
-
-                const articles = Array.isArray(response.data) ? response.data : [];
+                const articles = loadArticles();
                 commit('SET_ARTICLES', articles);
                 return articles;
             } catch (error) {
@@ -151,9 +137,9 @@ export default new Vuex.Store({
             commit('SET_LOADING', true);
             commit('SET_ERROR', null);
             try {
-                const response = await axios.get(`/articles/${id}`);
-                commit('SET_CURRENT_ARTICLE', response.data);
-                return response.data;
+                const article = loadArticles().find(item => String(item.id) === String(id)) || null;
+                commit('SET_CURRENT_ARTICLE', article);
+                return article;
             } catch (error) {
                 console.error('获取文章详情失败:', error);
                 commit('SET_ERROR', '获取文章详情失败');
@@ -166,8 +152,17 @@ export default new Vuex.Store({
             commit('SET_LOADING', true);
             commit('SET_ERROR', null);
             try {
-                const response = await axios.post('/articles', articleData);
-                const newArticle = response.data;
+                const newArticle = {
+                    id: Date.now(),
+                    title: articleData.title,
+                    content: articleData.content,
+                    tags: articleData.tags || [],
+                    cover_image: articleData.cover_image || '',
+                    created_at: new Date().toISOString().slice(0, 10),
+                    author: personalAuthor,
+                    comments: [],
+                    views_count: 0
+                };
                 commit('ADD_ARTICLE', newArticle);
                 return newArticle;
             } catch (error) {
@@ -183,8 +178,12 @@ export default new Vuex.Store({
             commit('SET_LOADING', true);
             commit('SET_ERROR', null);
             try {
-                const response = await axios.put(`/articles/${id}`, articleData);
-                const updatedArticle = response.data;
+                const current = loadArticles().find(item => String(item.id) === String(id));
+                if (!current) throw new Error('文章不存在');
+                const updatedArticle = {
+                    ...current,
+                    ...articleData
+                };
                 commit('UPDATE_ARTICLE', updatedArticle);
                 return updatedArticle;
             } catch (error) {
@@ -199,27 +198,6 @@ export default new Vuex.Store({
         async deleteArticle({ commit }, id) {
             commit('SET_LOADING', true);
             try {
-                const token = localStorage.getItem('token');
-                if (!token) {
-                    console.error('No token found in localStorage');
-                    throw new Error('需要登录');
-                }
-
-                const config = {
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json'
-                    }
-                };
-
-                console.log('Deleting article:', {
-                    id: id,
-                    token: token.substring(0, 10) + '...',
-                    headers: config.headers
-                });
-
-                const response = await axios.delete(`/articles/${id}`, config);
-                console.log('Delete article success:', response.data);
                 commit('REMOVE_ARTICLE', id);
                 return true;
             } catch (error) {
@@ -230,7 +208,7 @@ export default new Vuex.Store({
                     headers: error.response && error.response.headers
                 });
 
-                const errorMessage = error.response && error.response.data && error.response.data.message || '删除文章失败';
+                const errorMessage = '删除文章失败';
                 commit('SET_ERROR', errorMessage);
                 throw error;
             } finally {
@@ -241,9 +219,14 @@ export default new Vuex.Store({
             commit('SET_LOADING', true);
             commit('SET_ERROR', null);
             try {
-                const response = await axios.get('/admin/dashboard/stats');
-                commit('SET_DASHBOARD_STATS', response.data);
-                return response.data;
+                const articles = loadArticles();
+                const stats = {
+                    articleCount: articles.length,
+                    commentCount: articles.reduce((sum, a) => sum + (a.comments ? a.comments.length : 0), 0),
+                    viewCount: articles.reduce((sum, a) => sum + (a.views_count || 0), 0)
+                };
+                commit('SET_DASHBOARD_STATS', stats);
+                return stats;
             } catch (error) {
                 console.error('获取仪表盘数据失败:', error);
                 commit('SET_ERROR', '获取仪表盘数据失败');

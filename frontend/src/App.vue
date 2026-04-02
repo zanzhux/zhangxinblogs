@@ -7,21 +7,8 @@
           <router-link to="/categories" class="no-effect">分类</router-link>
           <router-link to="/archives" class="no-effect">归档</router-link>
           <router-link to="/albums" class="no-effect">摇滚专辑</router-link>
+          <router-link to="/chat" class="no-effect">AI助手</router-link>
           <router-link to="/about" class="no-effect">关于我</router-link>
-          <div class="nav-right">
-            <template v-if="!isAuthenticated">
-              <router-link to="/login" class="no-effect">登录</router-link>
-              <router-link to="/register" class="no-effect">注册</router-link>
-            </template>
-            <template v-else>
-              <router-link to="/chat" class="no-effect">AI助手</router-link>
-              <router-link to="/profile" class="no-effect user-profile-link">
-                {{ currentUser ? (currentUser.nickname || currentUser.username) : '' }}
-              </router-link>
-              <a href="#" @click.prevent="logout" class="no-effect logout-link">退出</a>
-            </template>
-            <router-link to="/admin/login" class="no-effect admin-link">管理员</router-link>
-          </div>
         </div>
 
         <button class="mobile-menu-btn" @click="toggleMobileMenu">
@@ -65,19 +52,8 @@
         <router-link to="/categories" @click="closeMobileMenu">分类</router-link>
         <router-link to="/archives" @click="closeMobileMenu">归档</router-link>
         <router-link to="/albums" @click="closeMobileMenu">摇滚专辑</router-link>
+        <router-link to="/chat" @click="closeMobileMenu">AI助手</router-link>
         <router-link to="/about" @click="closeMobileMenu">关于我</router-link>
-        <template v-if="!isAuthenticated">
-          <router-link to="/login" @click="closeMobileMenu">登录</router-link>
-          <router-link to="/register" @click="closeMobileMenu">注册</router-link>
-        </template>
-        <template v-else>
-          <router-link to="/chat" @click="closeMobileMenu">AI助手</router-link>
-          <router-link to="/profile" @click="closeMobileMenu">
-            {{ currentUser ? (currentUser.nickname || currentUser.username) : '个人资料' }}
-          </router-link>
-          <a href="#" @click.prevent="logout">退出</a>
-        </template>
-        <router-link to="/admin/login" @click="closeMobileMenu">管理员</router-link>
       </div>
       <div class="vertical-text">旅行青年的漂泊日记</div>
     </div>
@@ -109,8 +85,6 @@
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'vuex'
-
 export default {
   name: 'App',
   data() {
@@ -119,14 +93,7 @@ export default {
       searchQuery: ''
     }
   },
-  computed: {
-    ...mapGetters(['isAuthenticated', 'currentUser']),
-    isAdmin() {
-      return this.currentUser && this.currentUser.role === 'admin'
-    }
-  },
   methods: {
-    ...mapActions(['logout']),
     toggleMobileMenu() {
       this.mobileMenuOpen = !this.mobileMenuOpen
       document.body.classList.toggle('no-scroll', this.mobileMenuOpen)
@@ -213,40 +180,6 @@ body {
 .nav-links a:hover {
   opacity: 1;
   transform: translateY(-2px);
-}
-
-/* 添加导航栏右侧用户区域的样式 */
-.nav-right {
-  margin-left: auto;
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-md);
-}
-
-.user-profile-link {
-  color: var(--color-accent);
-  font-weight: 500;
-}
-
-.logout-link {
-  opacity: 0.8;
-}
-
-.logout-link:hover {
-  color: #ff6b6b;
-  opacity: 1;
-}
-
-.admin-link {
-  margin-left: 0.5rem;
-  padding: 0.2rem 0.5rem;
-  background-color: rgba(255, 255, 255, 0.1);
-  border-radius: 4px;
-  font-size: 0.9rem;
-}
-
-.admin-link:hover {
-  background-color: rgba(255, 255, 255, 0.2);
 }
 
 /* 顶部标题区域 - 现在在导航栏下面 */

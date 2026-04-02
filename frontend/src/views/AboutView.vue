@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="about-view">
     <div class="container">
       <div class="section-header">
@@ -9,23 +9,20 @@
       <div class="about-content">
         <div class="about-section">
           <div class="author-image">
-            <!-- 这里可以放置头像 -->
-            <div class="avatar-placeholder">
-              <span class="avatar-text">青年</span>
-            </div>
+            <img :src="avatar" alt="头像" class="avatar-img" />
           </div>
           
           <div class="author-info">
             <h2>关于博主</h2>
             <p>我是一名热爱音乐与文字的创作者，尤其痴迷于摇滚乐和文学。来自中国北方的小城，现居呼和浩特，以思考和记录为生。</p>
             <p>大学时期专业为计算机，现在专注于个人创作和分享，希望通过这个小小的网络角落，与同样热爱生活的朋友们交流。</p>
+            <p>热爱学习与探索，具备扎实的计算机思维与问题解决能力；逻辑严谨，善于理解客户需求并推动技术方案落地；熟练运用 AI 工具提升效率，能快速自学新技术并适应高强度协作环境。</p>
             
             <div class="author-quote">
               <p>"我摇摆在风中无能为力，风是一匹怒马，我拽不住它的缰绳"</p>
             </div>
           </div>
         </div>
-        
         <div class="about-section">
           <h2>博客简介</h2>
           <p>防波堤手记——在潮涌与荒诞的夹缝中，以文字浇筑抵抗的堤岸。这里寄存个体的清醒低语，记录被时代巨浪拍碎的泡沫与礁石。我们用锈蚀的语法修补裂缝，在虚无的轰鸣中捕捞沉没的月光。  </p>
@@ -38,70 +35,6 @@
           </ul>
         </div>
 
-        <div class="about-section">
-          <h2>我的技术</h2>
-          <p>我擅长把 AI 能力做成可用、可迭代、可落地的产品功能：从需求分析到 Agent 设计，再到 RAG 与生成式内容输出。</p>
-          <ul class="feature-list">
-            <li>AI 核心能力：AI Agent 开发、多智能体编排、RAG</li>
-            <li>AI 工程与协同：LangChain / LangGraph / Dify / Coze / Cursor 协同编程</li>
-            <li>AI 生成内容：文本 / 图像 / 视频</li>
-            <li>技术栈：Python / JavaScript / Vue / Node.js / MySQL / Linux</li>
-            <li>部署与平台：云平台（阿里云 / 腾讯云 / AWS）与 AI 应用全栈开发</li>
-          </ul>
-        </div>
-
-        <div class="about-section">
-          <h2>我的优势</h2>
-          <p>我的优势更偏“做方案并把它落地”：沟通表达清晰、技术落点明确、并能用数据与工具把事情推到完成。</p>
-          <ul class="feature-list">
-            <li>核心定位：沟通表达｜技术方案落地｜AI 工具应用｜数据分析</li>
-            <li>理解能力：智能软硬件理解 + 计算机思维与问题拆解能力</li>
-            <li>学习与适应：快速自学新技术，能适应高强度协作环境</li>
-            <li>方法论：逻辑严谨，善于理解需求并推动技术方案落地</li>
-          </ul>
-        </div>
-
-        <div class="about-section">
-          <h2>我的爱好</h2>
-          <p>我喜欢用爱好给生活“充电”：旅行保持好奇，爬山把注意力拉回脚下的节奏；而去摇滚现场看演出，让我把情绪交给灯光与合唱。</p>
-
-          <div class="media-grid">
-            <div class="media-card">
-              <img :src="img1" alt="旅行图片" class="media-img">
-              <div class="media-caption">旅行随拍：记录路上的光线与节奏</div>
-            </div>
-
-            <div class="media-card">
-              <img :src="img2" alt="旅行图片" class="media-img">
-              <div class="media-caption">旅行与徒步：把注意力留在脚下与远方</div>
-            </div>
-
-            <div class="media-card">
-              <img :src="img3" alt="阅读图片" class="media-img">
-              <div class="media-caption">阅读与写作补给：在书页里补能量</div>
-            </div>
-
-            <div class="media-card">
-              <video :src="video3" controls class="media-video"></video>
-              <div class="media-caption">摇滚现场：把情绪交给灯光与节奏</div>
-            </div>
-
-            <div class="media-card">
-              <img :src="img4" alt="生活图片" class="media-img">
-              <div class="media-caption">生活碎片：文字之外，也有自己的答案</div>
-            </div>
-
-            <div class="media-card">
-              <img :src="img5" alt="旅行图片" class="media-img">
-              <div class="media-caption">城市漫游：随走随记，随看随想</div>
-            </div>
-
-            <div class="media-card">
-              <video :src="video6" controls class="media-video"></video>
-              <div class="media-caption">第二段摇滚片段：把热烈留在当下</div>
-            </div>
-          </div>
-        </div>
         
         <div class="about-section">
           <h2>联系我</h2>
@@ -134,26 +67,14 @@
 </template>
 
 <script>
-import img1 from '@/assets/images/1.jpg'
-import img2 from '@/assets/images/2.jpg'
-import img3 from '@/assets/images/3.jpg'
-import img4 from '@/assets/images/4.jpg'
-import img5 from '@/assets/images/5.jpg'
-import video3 from '@/assets/images/3.mp4'
-import video6 from '@/assets/images/6.mp4'
+import avatar from '@/assets/images/logo.jpg'
 
 export default {
   name: 'AboutView'
   ,
   data() {
     return {
-      img1,
-      img2,
-      img3,
-      img4,
-      img5,
-      video3,
-      video6
+      avatar,
     }
   }
 }
@@ -202,22 +123,14 @@ export default {
   margin-bottom: var(--spacing-md);
 }
 
-.avatar-placeholder {
+.avatar-img {
   width: 150px;
   height: 150px;
   border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: var(--color-black);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  object-fit: cover;
+  border: 2px solid rgba(255, 255, 255, 0.25);
   margin: 0 auto;
-}
-
-.avatar-text {
-  font-family: 'Ma Shan Zheng', cursive;
-  font-size: 2.5rem;
-  color: white;
+  display: block;
 }
 
 .author-info h2 {
@@ -382,3 +295,6 @@ export default {
   }
 }
 </style> 
+
+
+
