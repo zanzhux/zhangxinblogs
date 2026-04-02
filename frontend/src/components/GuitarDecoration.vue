@@ -310,7 +310,7 @@ export default {
       return curve
     },
     playString(idx) {
-      const ctx = this.audioCtx; if (!ctx || ctx.state !== 'running') return
+      const ctx = this.audioCtx; if (!ctx) return
       const now = ctx.currentTime, freq = this.stringsData[idx].freq
       const pLen = Math.floor(ctx.sampleRate * 0.02)
       const pBuf = ctx.createBuffer(1, pLen, ctx.sampleRate)
@@ -406,14 +406,16 @@ export default {
     onStringTouchStart(i) {
       this.isDragging = true
       this.lastStrumIdx = i
-      const ctx = this._ensureCtx()
-      if (!ctx) return
-      if (ctx.state === 'running') {
-        this.pluck(i)
-      } else {
-        // 等 AudioContext 真正 running 后再播放
-        ctx.resume().then(() => this.pluck(i)).catch(() => { /* ignore */ })
+      // 同步创建并 resume（iOS 要求在手势同步代码里操作）
+      if (!this.audioCtx) {
+        try { this.audioCtx = new (window.AudioContext || window.webkitAudioContext)() }
+        catch (e) { return }
       }
+      if (this.audioCtx.state !== 'running') {
+        this.audioCtx.resume().catch(() => { /* ignore */ })
+      }
+      // 立即播放：iOS 下音频节点会在 context running 后自动发声
+      this.pluck(i)
     },
     onTouchMove(e) {
       if (!this.isDragging) return
