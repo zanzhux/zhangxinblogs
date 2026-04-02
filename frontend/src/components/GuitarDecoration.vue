@@ -261,7 +261,17 @@ export default {
     },
   },
 
+  mounted() {
+    // 页面任意首次触摸即预解锁，避免第一次点弦没声音
+    this._docUnlock = () => {
+      this._ensureCtx()
+      document.removeEventListener('touchstart', this._docUnlock)
+    }
+    document.addEventListener('touchstart', this._docUnlock, { passive: true })
+  },
+
   beforeUnmount() {
+    document.removeEventListener('touchstart', this._docUnlock)
     this.animFrames.forEach(f => f && cancelAnimationFrame(f))
     if (this.noteTimer) clearTimeout(this.noteTimer)
     if (this.audioCtx) this.audioCtx.close()
@@ -269,30 +279,27 @@ export default {
 
   methods: {
     /* ─── Audio ─── */
-    initAudio() {
+    _ensureCtx() {
       if (!this.audioCtx) {
         try { this.audioCtx = new (window.AudioContext || window.webkitAudioContext)() }
-        catch (e) { return }
+        catch (e) { return null }
       }
       const ctx = this.audioCtx
-      if (ctx.state !== 'running') {
-        ctx.resume().catch(() => {})
-        // 用静音 buffer 强制解锁 iOS AudioContext
+      if (ctx.state === 'suspended') {
+        // 静音 buffer 是解锁 iOS AudioContext 最可靠的方式
         try {
           const buf = ctx.createBuffer(1, 1, ctx.sampleRate)
           const src = ctx.createBufferSource()
           src.buffer = buf
           src.connect(ctx.destination)
           src.start(0)
-        } catch (e) { /* silent unlock */ }
+        } catch (e) { /* ignore */ }
+        ctx.resume().catch(() => { /* ignore */ })
       }
+      return ctx
     },
     getCtx() {
-      if (!this.audioCtx) {
-        try { this.audioCtx = new (window.AudioContext || window.webkitAudioContext)() }
-        catch (e) { return null }
-      }
-      return this.audioCtx
+      return this._ensureCtx()
     },
     makeDistortionCurve(k) {
       const n = 512, curve = new Float32Array(n)
@@ -303,8 +310,7 @@ export default {
       return curve
     },
     playString(idx) {
-      const ctx = this.getCtx(); if (!ctx) return
-      if (ctx.state !== 'running') return
+      const ctx = this.audioCtx; if (!ctx || ctx.state !== 'running') return
       const now = ctx.currentTime, freq = this.stringsData[idx].freq
       const pLen = Math.floor(ctx.sampleRate * 0.02)
       const pBuf = ctx.createBuffer(1, pLen, ctx.sampleRate)
@@ -398,12 +404,16 @@ export default {
     },
     onMouseUp() { this.isDragging = false; this.lastStrumIdx = -1 },
     onStringTouchStart(i) {
-      // 同步解锁 AudioContext（iOS 要求在手势回调中同步调用）
-      this.initAudio()
       this.isDragging = true
       this.lastStrumIdx = i
-      // 给 AudioContext 10ms 进入 running 状态后再播放
-      setTimeout(() => this.pluck(i), 10)
+      const ctx = this._ensureCtx()
+      if (!ctx) return
+      if (ctx.state === 'running') {
+        this.pluck(i)
+      } else {
+        // 等 AudioContext 真正 running 后再播放
+        ctx.resume().then(() => this.pluck(i)).catch(() => { /* ignore */ })
+      }
     },
     onTouchMove(e) {
       if (!this.isDragging) return
