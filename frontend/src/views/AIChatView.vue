@@ -442,20 +442,82 @@ button:disabled {
     }
 
     .message {
-        max-width: 90%;
+        max-width: 92%;
     }
 
     .chat-header h1 {
         font-size: 2rem;
     }
 
+    .chat-box {
+        height: 75vh;
+    }
+
     .input-area {
         flex-direction: column;
+        padding: 12px;
+        gap: 8px;
+    }
+
+    textarea {
+        rows: 2;
+        font-size: 16px; /* 防止 iOS 自动缩放 */
     }
 
     button {
         width: 100%;
         padding: 12px;
+        font-size: 1rem;
+    }
+
+    .welcome-message {
+        padding: 20px 10px;
+    }
+
+    .welcome-content h2 {
+        font-size: 1.5rem;
+    }
+
+    .suggested-question-btn {
+        font-size: 0.85rem;
+        padding: 6px 12px;
+    }
+}
+
+@media (max-width: 480px) {
+    .chat-container {
+        margin: 6px;
+        padding: 8px;
+    }
+
+    .chat-header {
+        flex-direction: column;
+        gap: 8px;
+        align-items: flex-start;
+    }
+
+    .chat-header h1 {
+        font-size: 1.6rem;
+        margin: 0;
+    }
+
+    .chat-box {
+        height: 78vh;
+    }
+
+    .messages {
+        padding: 12px;
+        gap: 10px;
+    }
+
+    .message {
+        max-width: 95%;
+        padding: 10px 12px;
+        font-size: 0.9rem;
+    }
+
+    .deep-thinking {
+        font-size: 0.85rem;
     }
 }
 </style>

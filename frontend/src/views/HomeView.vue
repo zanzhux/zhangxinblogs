@@ -607,4 +607,60 @@ export default {
     font-size: 0.9rem;
   }
 }
+
+@media (max-width: 480px) {
+  /* 极小屏隐藏吉他装饰 */
+  .hero-guitar-area {
+    display: none;
+  }
+
+  .hero-quote {
+    font-size: 1.5rem;
+  }
+
+  .hero-subtitle {
+    font-size: 0.95rem;
+  }
+
+  .brush-image-container {
+    max-width: 85%;
+  }
+
+  .article-inner {
+    flex-direction: column;
+  }
+
+  .article-thumbnail {
+    flex: none;
+    width: 100%;
+    max-height: 180px;
+    overflow: hidden;
+  }
+
+  .thumbnail-img {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+  }
+
+  .article-title {
+    font-size: 1.1rem;
+  }
+
+  .section-title {
+    font-size: 1.6rem;
+  }
+}
+
+@media (min-width: 481px) and (max-width: 768px) {
+  /* 平板尺寸缩小吉他 */
+  .hero-guitar-area {
+    max-width: 680px;
+    margin: var(--spacing-md) auto var(--spacing-lg);
+    transform: rotate(-2deg);
+  }
+  .hero-guitar-area:hover {
+    transform: rotate(-1deg) scale(1.01);
+  }
+}
 </style>

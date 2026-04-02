@@ -10,6 +10,7 @@
     @mousemove.passive="onMouseMove"
     @mouseup="onMouseUp"
     @mouseleave="onMouseUp"
+    @touchstart.passive="initAudio"
     @touchmove.prevent="onTouchMove"
     @touchend="onMouseUp"
   >
@@ -184,8 +185,8 @@
           @mousedown.stop="onStringDown(i)"
           @touchstart.prevent.stop="onStringTouchStart(i)"
           style="cursor:crosshair">
-          <!-- 宽命中区（旋转后变成横向长条） -->
-          <line :x1="s.x" y1="141" :x2="s.x" y2="581" stroke="transparent" stroke-width="20"/>
+          <!-- 宽命中区（旋转后变成横向长条，移动端需要更宽） -->
+          <line :x1="s.x" y1="141" :x2="s.x" y2="581" stroke="transparent" stroke-width="32"/>
           <!-- 发光层 -->
           <path v-if="s.vibrating"
             :d="getStringPath(i)"
@@ -267,13 +268,21 @@ export default {
   },
 
   methods: {
-    /* ─── Audio（与 GuitarView 相同） ─── */
+    /* ─── Audio ─── */
+    initAudio() {
+      if (!this.audioCtx) {
+        try { this.audioCtx = new (window.AudioContext || window.webkitAudioContext)() }
+        catch (e) { return }
+      }
+      if (this.audioCtx.state === 'suspended') {
+        this.audioCtx.resume().catch(() => {})
+      }
+    },
     getCtx() {
       if (!this.audioCtx) {
         try { this.audioCtx = new (window.AudioContext || window.webkitAudioContext)() }
         catch (e) { return null }
       }
-      if (this.audioCtx.state === 'suspended') this.audioCtx.resume()
       return this.audioCtx
     },
     makeDistortionCurve(k) {
@@ -284,8 +293,12 @@ export default {
       }
       return curve
     },
-    playString(idx) {
+    async playString(idx) {
       const ctx = this.getCtx(); if (!ctx) return
+      if (ctx.state === 'suspended') {
+        try { await ctx.resume() } catch (e) {}
+      }
+      if (ctx.state !== 'running') return
       const now = ctx.currentTime, freq = this.stringsData[idx].freq
       const pLen = Math.floor(ctx.sampleRate * 0.02)
       const pBuf = ctx.createBuffer(1, pLen, ctx.sampleRate)
@@ -328,8 +341,8 @@ export default {
       this.animFrames[idx] = requestAnimationFrame(tick)
     },
 
-    pluck(idx) {
-      this.playString(idx)
+    async pluck(idx) {
+      await this.playString(idx)
       this.startVibration(idx)
       this.lastNote = this.stringsData[idx].note
       clearTimeout(this.noteTimer)
@@ -360,9 +373,10 @@ export default {
       return ((clientY - r.top) / r.height) * 300
     },
     getStringAtY(svgY) {
-      let best = -1, bestD = 14
+      const isMobile = window.innerWidth <= 768
+      let best = -1, bestD = isMobile ? 22 : 14
       this.stringsData.forEach((s, i) => {
-        const yDisplay = 300 - s.x   // 旋转后弦的显示 y 坐标
+        const yDisplay = 300 - s.x
         const d = Math.abs(svgY - yDisplay)
         if (d < bestD) { bestD = d; best = i }
       })

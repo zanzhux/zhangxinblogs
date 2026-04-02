@@ -426,11 +426,11 @@ body {
     margin-left: auto;
   }
 
-  .search-bar .search-form {
-    max-width: 90%;
+  .search-form {
+    max-width: 92%;
   }
 
-  .search-bar .search-input {
+  .search-bar {
     font-size: 0.95rem;
     padding: 0.6rem 2.8rem 0.6rem 1rem;
   }
@@ -459,6 +459,56 @@ body {
 
   .main-content {
     padding: var(--spacing-md) 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .main-nav {
+    padding: 0.6rem var(--spacing-sm);
+  }
+
+  .search-container {
+    padding: 0.4rem 0;
+  }
+
+  .search-form {
+    max-width: 96%;
+  }
+
+  .search-bar {
+    font-size: 0.9rem;
+    padding: 0.55rem 2.6rem 0.55rem 0.9rem;
+  }
+
+  .main-header {
+    padding: var(--spacing-xs) 0;
+  }
+
+  .top-chars {
+    font-size: 0.8rem;
+    gap: 0.4rem;
+  }
+
+  .main-title img {
+    max-width: 85%;
+  }
+
+  .english-title {
+    font-size: 0.75rem;
+    letter-spacing: 0.12em;
+  }
+
+  .subtitle {
+    font-size: 0.7rem;
+  }
+
+  .mobile-menu-links a {
+    font-size: 1.3rem;
+  }
+
+  .main-footer {
+    padding: var(--spacing-sm);
+    font-size: 0.85rem;
   }
 }
 </style>
