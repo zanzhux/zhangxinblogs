@@ -296,7 +296,7 @@ export default {
     async playString(idx) {
       const ctx = this.getCtx(); if (!ctx) return
       if (ctx.state === 'suspended') {
-        try { await ctx.resume() } catch (e) {}
+        try { await ctx.resume() } catch (e) { /* audio unlock failed */ }
       }
       if (ctx.state !== 'running') return
       const now = ctx.currentTime, freq = this.stringsData[idx].freq
