@@ -274,8 +274,17 @@ export default {
         try { this.audioCtx = new (window.AudioContext || window.webkitAudioContext)() }
         catch (e) { return }
       }
-      if (this.audioCtx.state === 'suspended') {
-        this.audioCtx.resume().catch(() => {})
+      const ctx = this.audioCtx
+      if (ctx.state !== 'running') {
+        ctx.resume().catch(() => {})
+        // 用静音 buffer 强制解锁 iOS AudioContext
+        try {
+          const buf = ctx.createBuffer(1, 1, ctx.sampleRate)
+          const src = ctx.createBufferSource()
+          src.buffer = buf
+          src.connect(ctx.destination)
+          src.start(0)
+        } catch (e) { /* silent unlock */ }
       }
     },
     getCtx() {
@@ -293,11 +302,8 @@ export default {
       }
       return curve
     },
-    async playString(idx) {
+    playString(idx) {
       const ctx = this.getCtx(); if (!ctx) return
-      if (ctx.state === 'suspended') {
-        try { await ctx.resume() } catch (e) { /* audio unlock failed */ }
-      }
       if (ctx.state !== 'running') return
       const now = ctx.currentTime, freq = this.stringsData[idx].freq
       const pLen = Math.floor(ctx.sampleRate * 0.02)
@@ -341,8 +347,8 @@ export default {
       this.animFrames[idx] = requestAnimationFrame(tick)
     },
 
-    async pluck(idx) {
-      await this.playString(idx)
+    pluck(idx) {
+      this.playString(idx)
       this.startVibration(idx)
       this.lastNote = this.stringsData[idx].note
       clearTimeout(this.noteTimer)
@@ -391,7 +397,14 @@ export default {
       if (idx !== -1 && idx !== this.lastStrumIdx) { this.lastStrumIdx = idx; this.pluck(idx) }
     },
     onMouseUp() { this.isDragging = false; this.lastStrumIdx = -1 },
-    onStringTouchStart(i) { this.isDragging = true; this.lastStrumIdx = i; this.pluck(i) },
+    onStringTouchStart(i) {
+      // 同步解锁 AudioContext（iOS 要求在手势回调中同步调用）
+      this.initAudio()
+      this.isDragging = true
+      this.lastStrumIdx = i
+      // 给 AudioContext 10ms 进入 running 状态后再播放
+      setTimeout(() => this.pluck(i), 10)
+    },
     onTouchMove(e) {
       if (!this.isDragging) return
       const idx = this.getStringAtY(this.getSvgY(e.touches[0].clientY))
