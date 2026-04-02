@@ -311,7 +311,10 @@ export default {
     },
     playString(idx) {
       const ctx = this.getCtx(); if (!ctx) return
-      const now = ctx.currentTime, freq = this.stringsData[idx].freq
+      // iOS suspended 时 currentTime=0，音符会调度在"过去"导致无声
+      // 加 0.15s 偏移保证 context resume 后还来得及播放
+      const now = ctx.currentTime + (ctx.state === 'running' ? 0 : 0.15)
+      const freq = this.stringsData[idx].freq
       const pLen = Math.floor(ctx.sampleRate * 0.02)
       const pBuf = ctx.createBuffer(1, pLen, ctx.sampleRate)
       const pd = pBuf.getChannelData(0)
@@ -410,12 +413,13 @@ export default {
       const ctx = this.getCtx()
       if (!ctx) return
       if (ctx.state !== 'running') {
+        // 先播静音 buffer 解锁，再 resume
         try {
           const buf = ctx.createBuffer(1, 1, ctx.sampleRate)
           const src = ctx.createBufferSource()
           src.buffer = buf
           src.connect(ctx.destination)
-          src.start(0)
+          src.start(ctx.currentTime)
         } catch (e) { /* ignore */ }
         ctx.resume().catch(() => { /* ignore */ })
       }
