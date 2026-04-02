@@ -609,9 +609,14 @@ export default {
 }
 
 @media (max-width: 480px) {
-  /* 极小屏隐藏吉他装饰 */
   .hero-guitar-area {
-    display: none;
+    max-width: 100%;
+    margin: var(--spacing-sm) auto var(--spacing-md);
+    transform: rotate(-2deg);
+    opacity: 0.95;
+  }
+  .hero-guitar-area:hover {
+    transform: rotate(-1deg) scale(1.01);
   }
 
   .hero-quote {
